@@ -35,13 +35,21 @@ fn run() -> Result<(), String> {
 
   let cmd = command;
   let mut child_process = make_command(&cmd).unwrap();
-  'watching: loop {
+  loop {
     match watch_rx.recv() {
       Ok(event) => {
           match event {
             // The set of events that correspond to a command restart
             DebouncedEvent::Create(_) | DebouncedEvent::Write(_) => {
               child_process.kill().unwrap();
+              match child_process.kill() {
+                Ok(_) => {},
+                Err(_) => {},
+              };
+              match child_process.wait() {
+                Ok(_) => {},
+                Err(_) => {},
+              };
               child_process = make_command(&cmd)?;
             }
             _ => {},
